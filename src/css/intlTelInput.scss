@@ -1,3 +1,5 @@
+@use "sass:math";
+
 // NOTE: by using !default on all variables, we're saying only declare the variable if it doesn't
 // already exist, which allows devs to declare these variables themselves and assign them any value
 // they want before importing this file
@@ -6,7 +8,7 @@
 // the border-highlighting some browsers give the input on focus
 $hoverColor: rgba(0, 0, 0, 0.05) !default;
 $greyText: #999 !default;
-$greyBorder: #CCC !default;
+$greyBorder: #ccc !default;
 
 $flagHeight: 15px !default;
 $flagWidth: 20px !default;
@@ -17,13 +19,14 @@ $borderWidth: 1px !default;
 
 $arrowHeight: 4px !default;
 $arrowWidth: 6px !default;
-$triangleBorder: 3px !default;
-$arrowPadding: 6px !default;
+$triangleBorder: math.div($arrowWidth, 2) !default;
+$arrowPadding: $arrowWidth !default;
 $arrowColor: #555 !default;
 
 $inputPadding: 6px !default;
 $selectedFlagWidth: $flagWidth + (2 * $flagPadding) !default;
-$selectedFlagArrowWidth: $flagWidth + $flagPadding + $arrowWidth + (2 * $arrowPadding) !default;
+$selectedFlagArrowWidth: $flagWidth + $flagPadding + $arrowWidth +
+  (2 * $arrowPadding) !default;
 
 // image related variables
 $flagsImagePath: "../img/" !default;
@@ -44,7 +47,6 @@ $mobilePopupMargin: 30px !default;
   // http://www.paulirish.com/2012/box-sizing-border-box-ftw/
   * {
     box-sizing: border-box;
-    -moz-box-sizing: border-box;
   }
 
   &__hide {
@@ -56,7 +58,9 @@ $mobilePopupMargin: 30px !default;
   }
 
   // specify types to increase specificity e.g. to override bootstrap v2.3
-  input, input[type=text], input[type=tel] {
+  input,
+  input[type="text"],
+  input[type="tel"] {
     position: relative;
     // input is bottom level, below selected flag and dropdown
     z-index: 0;
@@ -111,6 +115,11 @@ $mobilePopupMargin: 30px !default;
     border-right: $triangleBorder solid transparent;
     border-top: $arrowHeight solid $arrowColor;
 
+    [dir="rtl"] & {
+      margin-right: $arrowPadding;
+      margin-left: 0;
+    }
+
     &--up {
       border-top: none;
       border-bottom: $arrowHeight solid $arrowColor;
@@ -125,8 +134,6 @@ $mobilePopupMargin: 30px !default;
 
     // override default list styles
     list-style: none;
-    // in case any container has text-align:center
-    text-align: left;
 
     // place menu above the input element
     &--dropup {
@@ -138,7 +145,7 @@ $mobilePopupMargin: 30px !default;
     // margin-left to compensate for the padding on the parent
     margin: 0 0 0 (-$borderWidth);
 
-    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
     background-color: white;
     border: $borderWidth solid $greyBorder;
 
@@ -175,6 +182,8 @@ $mobilePopupMargin: 30px !default;
   // each country item in dropdown (we must have separate class to differentiate from dividers)
   &__country {
     // Note: decided not to use line-height here for alignment because it causes issues e.g. large font-sizes will overlap, and also looks bad if one country overflows onto 2 lines
+    display: flex;
+    align-items: center;
     padding: 5px 10px;
     outline: none;
   }
@@ -188,23 +197,40 @@ $mobilePopupMargin: 30px !default;
   }
 
   // spacing between country flag, name and dial code
-  &__flag-box, &__country-name, &__dial-code {
-    vertical-align: middle;
-  }
-  &__flag-box, &__country-name {
+  &__flag-box,
+  &__country-name {
     margin-right: 6px;
+
+    [dir="rtl"] & {
+      margin-right: 0;
+      margin-left: 6px;
+    }
   }
 
   // these settings are independent of each other, but both move selected flag to left of input
-  &--allow-dropdown, &--separate-dial-code {
-    input, input[type=text], input[type=tel] {
+  &--allow-dropdown,
+  &--separate-dial-code {
+    input,
+    input[type="text"],
+    input[type="tel"] {
       padding-right: $inputPadding;
       padding-left: $selectedFlagArrowWidth + $inputPadding;
       margin-left: 0;
+
+      [dir="rtl"] & {
+        padding-right: $selectedFlagArrowWidth + $inputPadding;
+        padding-left: $inputPadding;
+        margin-right: 0;
+      }
     }
     .iti__flag-container {
       right: auto;
       left: 0;
+
+      [dir="rtl"] & {
+        right: 0;
+        left: auto;
+      }
     }
   }
 
@@ -231,7 +257,7 @@ $mobilePopupMargin: 30px !default;
       // now that we have digits in this section, it needs this visual separation
       background-color: $hoverColor;
     }
-    .iti__selected-dial-code {
+    &.iti--show-flags .iti__selected-dial-code {
       margin-left: $arrowPadding;
     }
   }
@@ -271,11 +297,6 @@ $mobilePopupMargin: 30px !default;
   }
 }
 
-
-
-
-
-
 @import "sprite";
 
 .iti__flag {
@@ -284,15 +305,13 @@ $mobilePopupMargin: 30px !default;
   background-image: url("#{$flagsImagePath}#{$flagsImageName}.#{$flagsImageExtension}");
   background-repeat: no-repeat;
   // empty state
-  background-color: #DBDBDB;
+  background-color: #dbdbdb;
   background-position: $flagWidth 0;
 
   @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     background-image: url("#{$flagsImagePath}#{$flagsImageName}@2x.#{$flagsImageExtension}");
   }
 }
-
-
 
 // hack for Nepal which is the only flag that is not square/rectangle, so it has transparency, so you can see the default grey behind it
 .iti__flag.iti__np {
